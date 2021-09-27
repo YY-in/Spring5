@@ -126,11 +126,11 @@
 
 1. xml解析、工厂模式、反射
 
-![image-20210927110422772](/Volumes/D/code/Java/Spring5/img/image-20210927110422772.png)
+![image-20210927110422772](../img/image-20210927110422772.png)
 
-![image-20210927110925959](/Volumes/D/code/Java/Spring5/img/image-20210927110925959.png)
+![image-20210927110925959](../img/image-20210927110925959.png)
 
-![image-20210927111730800](/Volumes/D/code/Java/Spring5/img/image-20210927111730800.png)
+![image-20210927111730800](../img/image-20210927111730800.png)
 
 利用反射进行对象的创建，可以进一步解耦，当类的路径发生变化时我们只需哟修改配置文件即可。
 
