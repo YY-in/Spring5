@@ -1,8 +1,8 @@
 # Spring5 框架
 
-## 1.Spring框架概述
+> ## 1.Spring框架概述
 
-### 1.1.简介
+> ### 1.1.简介
 
  	1. Spring是轻量级、开源、JavaEE的框架
  	2. Spring可以解决企业应用开发的复杂性
@@ -20,7 +20,7 @@
 
 5. 选择Spring5学习
 
-### 1.2.准备工作
+> ### 1.2.准备工作
 
 1. maven创建普通java项目
 
@@ -112,9 +112,9 @@
 
    
 
-## 2.IOC容器
+>## 2.IOC容器
 
-### 2.1.IOC的底层原理
+>### 2.1.IOC的底层原理
 
 #### 2.1.1.什么是IOC（控制反转）
 
@@ -131,20 +131,38 @@
 ![image-20210927110925959](./img/image-20210927110925959.png)
 
 ![image-20210927111730800](./img/image-20210927111730800.png)
+1. 解析 xml文件
+2. 反射加载字节码文件
+3. 反射创建类的对象（强转）
+> ### 2.2.IOC接口（BeanFactory）
+1. IOC的思想基于IOC容器完成，IOC底层就是对象工厂
+2. Spring提供IOC实现的两种方式（两个接口）
+   + BeanFactory
+     + IOC容器基本实现，是Spring内部使用的接口，不提供开发人员使用。
+     + 加载配置文件时候不会创建对象，在获取对象(使用getBean()方法)的时候才会创建对象。
+   + ApplicationContext
+     + BeanFactory接口的子接口，提供更加强大的功能，一般由开发人员使用。
+     + 加载配置文件的时候就会把在配置文件中的对象进行创建
+3. Application接口的实现类
+      ![接口实现类](./img/ApplicationHierarchyTree.png)
+    + FileSystemXmlApplication()添加系统的绝对路径
+    + ClassPathXmlApplication() 对应项目src下开始的目录路径
 
-利用反射进行对象的创建，可以进一步解耦，当类的路径发生变化时我们只需哟修改配置文件即可。
+> ### 2.3.Bean管理
+1. 什么是Bean管理，它指的是两个操作
+    1. Spring创建对象
+    2. Spring的属性注入
+#### 2.3.1IOC操作Bean管理（基于XML）
+1. 创建对象
+2. 注入属性
+#### 2.3.2IOC操作Bean管理（基于注释）
+1. 创建对象
+2. 注入属性
+> ## 3.Aop
 
-### 2.2.IOC接口（BeanFactory）
+> ## 4.JDBCTemplate
 
-### 2.3.IOC操作Bean管理（基于XML）
+> ## 5.事务管理
 
-### 2.4.IOC操作Bean管理（基于注释）
-
-## 3.Aop
-
-## 4.JDBCTemplate
-
-## 5.事务管理
-
-## 6.Spring5新特性
+> ## 6.Spring5新特性
 
