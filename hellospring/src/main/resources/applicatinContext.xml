@@ -2,6 +2,23 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-    <!--配置User对象创建-->
-    <bean id="user1" class="org.example.User"></bean>
+
+    <!--1.创建对象-->
+    <bean id="book" class="org.example.Book">
+        <!--2.set方法注入属性-->
+        <!--使用property完成属性注入
+            name:类里面属性的名称
+            value:向属性里面注入的值
+            -->
+        <property name="bname" value="精神明亮的人"></property>
+        <property name="bauthor" value="王开岭"></property>
+    </bean>
+
+    <!--3.利用有参构造注入属性-->
+    <bean id="order" class="org.example.Order">
+
+        <constructor-arg index="1" value="南京"/>
+        <constructor-arg name="oname" value="书本"/>
+    </bean>
+
 </beans>

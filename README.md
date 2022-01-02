@@ -143,8 +143,8 @@
    + ApplicationContext
      + BeanFactory接口的子接口，提供更加强大的功能，一般由开发人员使用。
      + 加载配置文件的时候就会把在配置文件中的对象进行创建
-3. Application接口的实现类
-      ![接口实现类](./img/ApplicationHierarchyTree.png)
+3. Application接口的实现类   
+      ![接口实现类](./img/ApplicationHierarchyTree.png)   
     + FileSystemXmlApplication()添加系统的绝对路径
     + ClassPathXmlApplication() 对应项目src下开始的目录路径
 
@@ -153,8 +153,25 @@
     1. Spring创建对象
     2. Spring的属性注入
 #### 2.3.1IOC操作Bean管理（基于XML）
-1. 创建对象
-2. 注入属性
+1. 创建对象  
+    ![xml的对象创建](./img/xmlBeanOperation.png)   
+   1. 在spring配置文件中,使用bean标签,标签里面添加对应的属性,就可以实现对象的创建
+   2. 在bean标签中有很多属性,以下介绍常用的属性
+      + class ： 所需要创建对象类的全路径(包类路径)
+      + id : 获取对象的唯一标识
+      + name ： 可以使用特殊符号的id属性
+   3. 创建对象的时候默认执行无参构造
+2. 注入属性    
+   1. DI：依赖注入：就是属性
+        + 第一种注入方式：使用set方法进行注入    
+          ![set方法依赖注入](img/setFuncationDI.png)
+          1. 创建类：定义属性和对应的set方法
+          2. 在spring配置文件配置对象创建，配置属性注入
+        + 第二种注入方式：使用有参数的构造进行注入   
+          ![构造器依赖注入](img/constructorDI.png)
+          1. 创建类：定义属性和属性对应的有参构造方法
+          2. 在spring的配置文件中配置对象创建，配置属性注入,可以通过索引值或者名称完成注入
+
 #### 2.3.2IOC操作Bean管理（基于注释）
 1. 创建对象
 2. 注入属性
