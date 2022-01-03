@@ -5,6 +5,12 @@
       <configuration>
         <fileset id="fileset" name="ApplicatinContext" removed="false">
           <file>file://$MODULE_DIR$/src/main/resources/applicatinContext.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/bean1.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/bean2.xml</file>
+          <file>file://$MODULE_DIR$/src/main/resources/collectionContext.xml</file>
+        </fileset>
+        <fileset id="fileset2" name="Bean" removed="false">
+          <file>file://$MODULE_DIR$/src/main/resources/bean.xml</file>
         </fileset>
       </configuration>
     </facet>

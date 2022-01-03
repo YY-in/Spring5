@@ -19,7 +19,7 @@ public class TestSpring5 {
     }
 
     @Test
-    public void tsetBook1() {
+    public void tsetBook() {
         //1.加载Spring的配置文件.注意需要读取的目录路径    BeanFactory
         ApplicationContext context = new FileSystemXmlApplicationContext("src/main/resources/applicatinContext.xml");
         //2.获取配置创建的对象
