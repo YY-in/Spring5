@@ -411,11 +411,241 @@ c. request 请求 session 对话
 </bean>
 ```
 > 
->>>10. bean的生命周期
->    
-> #### 2.3.2.IOC操作Bean管理（基于注释）
-1. 创建对象
-2. 注入属性
+>>>10. bean的生命周期   
+>>>> 1、生命周期 ：从对象创建到对象销毁的过程     
+>>>> 2、bean 生命周期   
+>>>>>（1）通过构造器创建 bean 实例（无参数构造）  
+（2）为 bean 的属性设置值和对其他 bean 引用（调用 set 方法）  
+（3）调用 bean 的初始化的方法（需要进行配置初始化的方法）  
+（4）bean 可以使用了（对象获取到了）  
+（5）当容器关闭时候，调用 bean 的销毁的方法（需要进行配置销毁的方法）      
+ 
+>>>>3、演示 bean 生命周期 ：
+```java
+public class Orders {
+    //无参数构造
+     public Orders() {
+         System.out.println("第一步 执行无参数构造创建 bean 实例");
+     }
+     private String oname;
+     public void setOname(String oname) {
+         this.oname = oname;
+         System.out.println("第二步 调用 set 方法设置属性值");
+     }
+     //创建执行的初始化的方法
+     public void initMethod() {
+         System.out.println("第三步 执行初始化的方法");
+     }
+     //创建执行的销毁的方法
+     public void destroyMethod() {
+         System.out.println("第五步 执行销毁的方法");
+     }
+}
+        
+        
+public class MyBeanPost implements BeanPostProcessor {//创建后置处理器实现类
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        System.out.println("在初始化之前执行的方法");
+        return bean;
+    }
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        System.out.println("在初始化之后执行的方法");
+        return bean;
+    }
+}
+
+
+```
+```xml
+<!--配置文件的bean参数配置-->
+<bean id="orders" class="com.atguigu.spring5.bean.Orders" init-method="initMethod" destroy-method="destroyMethod">	<!--配置初始化方法和销毁方法-->
+    <property name="oname" value="手机"></property><!--这里就是通过set方式（注入属性）赋值-->
+</bean>
+
+<!--配置后置处理器-->
+<bean id="myBeanPost" class="com.atguigu.spring5.bean.MyBeanPost"></bean>
+
+```
+>>>> 4、bean 的后置处理器，bean 生命周期有七步 （正常生命周期为五步，而配置后置处理器后为七步）   
+>>>>>（1）通过构造器创建 bean 实例（无参数构造）  
+（2）为 bean 的属性设置值和对其他 bean 引用（调用 set 方法）  
+（3）把 bean 实例传递 bean 后置处理器的方法 postProcessBeforeInitialization   
+（4）调用 bean 的初始化的方法（需要进行配置初始化的方法）  
+（5）把 bean 实例传递 bean 后置处理器的方法 postProcessAfterInitialization   
+（6）bean 可以使用了（对象获取到了）   
+（7）当容器关闭时候，调用 bean 的销毁的方法（需要进行配置销毁的方法）   
+
+>>>10. IOC 操作 Bean 管理(外部属性文件)
+
+    方式一：直接配置数据库信息 ：（1）配置Druid（德鲁伊）连接池 （2）引入Druid（德鲁伊）连接池依赖 jar 包
+```xml
+<!--直接配置连接池-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql://localhost:3306/userDb"></property>
+        <property name="username" value="root"></property>
+        <property name="password" value="root"></property>
+    </bean>
+```
+    方式二：引入外部属性文件配置数据库连接池
+
+    （1）创建外部属性文件，properties 格式文件，写数据库信息（jdbc.properties）
+```xml
+    prop.driverClass=com.mysql.jdbc.Driver
+    prop.url=jdbc:mysql://localhost:3306/userDb
+    prop.userName=root
+    prop.password=root
+```
+（2）把外部 properties 属性文件引入到 spring 配置文件中 —— 引入 context 名称空间
+```xml
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:context="http://www.springframework.org/schema/context"
+xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"><!--引入context名称空间-->
+
+        <!--引入外部属性文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!--配置连接池-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${prop.driverClass}"></property>
+        <property name="url" value="${prop.url}"></property>
+        <property name="username" value="${prop.userName}"></property>
+        <property name="password" value="${prop.password}"></property>
+    </bean>
+
+</beans>
+```
+ #### 2.3.2.IOC操作Bean管理（基于注释）
+>>什么是注解？
+> 
+>（1）注解是代码的特殊标记，格式@注解名称（属性名称=属性值，属性名称=属性值...）  
+>（2）使用注解，注解作用在类上面，方法上面，属性上面   
+>（3）使用注解的目的：简化xml配置
+> 
+>>Spring针对Bean管理中创建对象提供注解
+> 
+> 下面四个注解功能相同，都可以用来创建bean实例
+> @Component、@Service、@Controller、@Repository  
+> 
+1.  基于注解方式实现对象创建  
+> 
+> （1）引入依赖（引入spring-aop jar包）  
+> （2）开启组件扫描 
+```xml
+    <!--开启组件扫描 ：如果扫描多个包
+    1.多个包使用逗号隔开
+    2. 扫描包上层目录-->
+    <context:component-scan base-package="..."></context:component-scan>
+```
+> (3)创建类，在类上面添加对象注解
+```java
+//在注解里面value 属性可以省略不写
+//默认值是类名称,首字母小写
+//UserService -- userService
+@Component(value ="userService") //注解等同于xml配置文件：<bean id="userService" class=""></bean>
+public class UserService {
+    public void add(){
+        System.out.println("Service add ...");
+    }
+}
+```
+> (4)开启组件扫描的细节配置
+```xml
+<!--示例 1
+ use-default-filters="false" 表示现在不使用默认 filter，自己配置 filter
+ context:include-filter ,设置扫描哪些内容
+-->
+<context:component-scan base-package="com.atguigu" use-defaultfilters="false">
+ <context:include-filter type="annotation"
+
+expression="org.springframework.stereotype.Controller"/><!--代表只扫描Controller注解的类-->
+</context:component-scan>
+<!--示例 2
+ 下面配置扫描包所有内容
+ context:exclude-filter： 设置哪些内容不进行扫描
+-->
+<context:component-scan base-package="com.atguigu">
+ <context:exclude-filter type="annotation"
+
+expression="org.springframework.stereotype.Controller"/><!--表示Controller注解的类之外一切都进行扫描-->
+</context:component-scan>
+
+```
+2. 基于注解方式注入属性
+>> (1)@Autowired: 根据类型进行自动装配 
+> 
+> 第一步 把service和dao对象创建,在service和到类添加创建对象的注解   
+> 第二步 在service注入到对象,在service类添加dao类型属性.在属性上使用注解    
+```java
+@Service
+public class UserService {
+ //定义 dao 类型属性
+ //不需要添加 set 方法
+ //添加注入属性注解
+ @Autowired
+ private UserDao userDao;
+ public void add() {
+ System.out.println("service add.......");
+ userDao.add();
+ }
+}
+
+//Dao实现类
+@Repository
+//@Repository(value = "userDaoImpl1")
+public class UserDaoImpl implements UserDao {
+    @Override
+    public void add() {
+        System.out.println("dao add.....");
+    }
+}
+```
+>> (2)@Qualifier:根据名称进行注入    
+>这个Qualifier注解可以和上面的@Autowired一起使用
+```java
+//定义 dao 类型属性
+//不需要添加 set 方法
+//添加注入属性注解
+@Autowired //根据类型进行注入
+//根据名称进行注入（目的在于区别同一接口下有多个实现类，根据类型就无法选择，从而出错！）
+@Qualifier(value = "userDaoImpl1")
+private UserDao userDao;
+
+```
+>> (3)Resource:可以根据类型注入，也可以根据名称注入
+```java
+//@Resource //根据类型进行注入
+@Resource(name = "userDaoImpl1") //根据名称进行注入
+private UserDao userDao;
+```
+>> (4)@Value:注入普通类型属性
+```java
+@Value(value = "abc")
+private String name
+```
+>> (5)完全注解开发   
+>
+> 1)创建配置类,替代xml配置文件    
+> @Configuration 修饰类为配置类    
+> @ComponentScan(basePackages={"..."}) 配置扫描路径   
+>>测试类
+```java
+@Test
+public void testService2() {
+ //加载配置类
+ ApplicationContext context
+ = new AnnotationConfigApplicationContext(SpringConfig.class);
+ UserService userService = context.getBean("userService",
+UserService.class);
+ System.out.println(userService);
+ userService.add();
+}
+
+```
 > ## 3.Aop
 
 > ## 4.JDBCTemplate
