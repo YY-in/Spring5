@@ -160,7 +160,7 @@
   >> ![xml的对象创建](./img/xmlBeanOperation.png)   
   >> 1. 在spring配置文件中,使用bean标签,标签里面添加对应的属性,就可以实现对象的创建
   >> 2. 在bean标签中有很多属性,以下介绍常用的属性
-   >>> + class ： 所需要创建对象类的全路径(包类路径)
+   >>> + class ： 所需要创
    >>> + id : 获取对象的唯一标识
    >>> + name ： 可以使用特殊符号的id属性
   >> 3. 创建对象的时候默认执行无参构造
@@ -632,6 +632,14 @@ private String name
 > 1)创建配置类,替代xml配置文件    
 > @Configuration 修饰类为配置类    
 > @ComponentScan(basePackages={"..."}) 配置扫描路径   
+```java
+@Configuration //作为配置类，替代 xml 配置文件
+@ComponentScan(basePackages = {"com.atguigu"})
+public class SpringConfig {
+    .....
+}
+
+```
 >>测试类
 ```java
 @Test
@@ -646,10 +654,220 @@ UserService.class);
 }
 
 ```
-> ## 3.Aop
+> ## 3.Aop（Aspect Oriented Programming）
+1. 面向切面编程（方面），利用AOP可以对业务逻辑的各个部分进行隔离,从而使得业务逻辑各个部分之间的耦合度降低,提高程序的复用性,同时提高了了开发的效率
+2. 通俗表述**不通过修改源代码的方式，在主干功能里面添加新功能**
+3. 使用登录例子说明AOP     
+![AOP_example](img/AOP.png)
+>AOP的底层原理   
+> a. AOP底层使用动态代理，动态代理有两种情况    
+>> 第一种有接口情况，使用JDK动态代理   
+![JDKProxy](img/JDKProxy.png)    
+>> 第二种没有接口情况，使用CGLIB动态代理    
+>   创建子类的代理对象，增强类的方法
+![](img/CGLIBProxy.png)
+### AOP(JDKProxy)底层代码
+1. 使用JDK动态代理，使用Proxy类里面的方法创建代理对象
 
+```java.lang.reflect```有一个Proxy类
+
+> (1)调用newProxyInstance静态方法
+```java
+public static Object newProxyInstance(ClassLoader loader,
+        Class<?>[] interfaces,
+        InvocationHandler h)
+
+```
+ 
+|参数|描述|
+|:---|:---|
+|ClassLoader loader|类加载器|
+|Object [] interfaces|增强方法所在的类，这个类实现的接口，支持多个接口|
+|InvocationHandler h|实现接口InvokationHandler，创建代理对象，写增强的方法|
+
+> (2)JDKDynamicProxy原理
+
+(1)创建接口，定义方法
+(2)创建接口实现类,实现方法
+(3)使用Proxy类创建接口代理对象
+```java
+package aop;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+
+/**
+ * @Author: YinZhihao
+ * @Description:
+ * @Date: Created in 17:01 2022/1/5
+ */
+public class JDKProxy {
+    public static void main(String[] args) {
+        //接口类
+        Class[] interfaces = {UserDao.class};
+        //
+        UserDaoImpl userDao = new UserDaoImpl();
+        //创建接口实现类的代理对象
+        UserDao dao = (UserDao) Proxy.newProxyInstance(JDKProxy.class.getClassLoader(), interfaces, new UserDaoProxy(userDao));
+        System.out.println(dao.add(2, 3));
+        System.out.println(dao.update("123"));
+    }
+
+
+}
+//创建代理对象代码，增强类
+class UserDaoProxy implements InvocationHandler {
+    //1.把代理对象指向的实现类传递过来
+    //有参数构造传递
+    private Object obj;
+    public UserDaoProxy(Object  obj){
+        this.obj=obj;
+    }
+    //增强的逻辑
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        //方法之前
+        System.out.println("在方法之前执行"+method.getName()+":传递的参数..."+ Arrays.toString(args));
+
+        //被增强方法执行
+        Object res = method.invoke(obj, args);
+
+        //方法之后
+        System.out.println("在方法之后执行..."+obj);
+
+        return res;
+    }
+}
+```
+###  AOP 术语
+ a）连接点：类里面哪些方法可以被增强，这些方法称为连接点
+
+ b）切入点：实际被真正增强的方法称为切入点
+
+ c）通知（增强）：实际增强的逻辑部分称为通知，且分为以下五种类型：
+
+ 1）前置通知   
+ 2）后置通知   
+ 3）环绕通知   
+ 4）异常通知   
+ 5）最终通知
+
+ d）切面：把通知应用到切入点过程
+ ### AOP Spring的实践
+ 1. Spring框架一般基于ASpectJ实现
+> 什么是AspectJ    
+> AspectJ不是spring组成部分,它是独立的AOP框架,一般把AspectJ和Spring框架一起使用,进行AOP的相关操作。
+
+2.基于AspectJ实现AOP操作 
+>(1)基于xml配置文件实现   
+ (2)基于注解方式实现(通常使用)
+3. 在项目工程中引入切入点表达式的作用:   
+> 知道对哪个类里面的哪个方法进行增强
+>> 语法结构
+> 
+>execution([权限修饰符][返回类型][类全路径][方法名称]  ([参数列表]))
+```java
+//（3）例子如下：
+//例 1：对 com.atguigu.dao.BookDao 类里面的 add 进行增强
+execution(* com.atguigu.dao.BookDao.add(..))
+//例 2：对 com.atguigu.dao.BookDao 类里面的所有的方法进行增强
+execution(* com.atguigu.dao.BookDao.* (..))
+// 例 3：对 com.atguigu.dao 包里面所有类，类里面所有方法进行增强
+execution(* com.atguigu.dao.*.* (..))
+```
+```java
+//4、配置不同类型的通知
+@Component
+@Aspect  //生成代理对象
+public class UserProxy {
+      //相同切入点抽取
+    @Pointcut(value = "execution(* com.atguigu.spring5.aopanno.User.add(..))")
+    public void pointdemo() {
+
+    }
+
+    //前置通知
+    //@Before注解表示作为前置通知
+    @Before(value = "pointdemo()")//相同切入点抽取使用！
+    public void before() {
+        System.out.println("before.........");
+    }
+
+    //后置通知（返回通知）,又返回值后才执行，所以存在异常不执行
+    @AfterReturning(value = "execution(* com.atguigu.spring5.aopanno.User.add(..))")
+    public void afterReturning() {
+        System.out.println("afterReturning.........");
+    }
+
+    //最终通知
+    @After(value = "execution(* com.atguigu.spring5.aopanno.User.add(..))")
+    public void after() {
+        System.out.println("after.........");
+    }
+
+    //异常通知
+    @AfterThrowing(value = "execution(* com.atguigu.spring5.aopanno.User.add(..))")
+    public void afterThrowing() {
+        System.out.println("afterThrowing.........");
+    }
+
+    //环绕通知
+    @Around(value = "execution(* com.atguigu.spring5.aopanno.User.add(..))")
+    public void around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        System.out.println("环绕之前.........");
+
+        //被增强的方法执行
+        proceedingJoinPoint.proceed();
+
+        System.out.println("环绕之后.........");
+    }
+}
+```
+4.重用切入点的定义(抽取切入点)   
+```java
+//相同切入点抽取
+    @Pointcut(value = "execution(* aopAnno.User.add(..))")
+    public void pointdemo(){
+        ......
+    }
+    @Before(value="pointdemo()")
+    public void  before (){
+        System.out.print("....");
+    }
+```
+5.有多个增强类对同一个方法进行增强，设置增强类优先级      
+可以子啊增强类的上面添加一个注解作为前置通知,数字值越小越优先
+```java
+@Component
+@Aspect
+@Order(1)
+public class PersonProxy{ }
+```
+6.配置文件方式实践
+````xml
+<!--1、创建两个类，增强类和被增强类，创建方法（同上一样）-->
+<!--2、在 spring 配置文件中创建两个类对象-->
+<!--创建对象-->
+<bean id="book" class="com.atguigu.spring5.aopxml.Book"></bean>
+<bean id="bookProxy" class="com.atguigu.spring5.aopxml.BookProxy"></bean>
+<!--3、在 spring 配置文件中配置切入点-->
+<!--配置 aop 增强-->
+<aop:config>
+ <!--切入点-->
+ <aop:pointcut id="p" expression="execution(* com.atguigu.spring5.aopxml.Book.buy(..))"/>
+ <!--配置切面-->
+ <aop:aspect ref="bookProxy">
+ <!--增强作用在具体的方法上-->
+ <aop:before method="before" pointcut-ref="p"/>
+ </aop:aspect>
+</aop:config>
+
+
+````
 > ## 4.JDBCTemplate
-
+> 
 > ## 5.事务管理
 
 > ## 6.Spring5新特性
